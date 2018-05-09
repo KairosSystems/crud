@@ -1,0 +1,24 @@
+{
+    "name": "kairossystems/crud",
+    "description": "Easy CRUDs.",
+    "keywords": ["php", "crud", "laravel","controller"],
+    "license": "MIT",
+    "homepage": "https://kairos.systems",
+    "authors": [
+        {
+            "name": "Kairos Systems",
+            "email": "contacto@kairos.systems"
+        }
+    ],
+    "require": {
+        "php": ">=7.0",
+        "laravel/framework": ">=5.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "KairosSystems\\CRUD\\": "src/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
