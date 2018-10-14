@@ -31,7 +31,9 @@ class TestController extends BaseController
     protected $rulesCreate = [
         'name' => 'required|unique:users'
     ];
-
+    protected $rulesUpdate = [
+        'name' => 'required|unique:users'
+    ];
 }
 ```
 Now you have the index store, update and delete methods automagically
