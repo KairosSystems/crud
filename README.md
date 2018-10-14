@@ -1,6 +1,8 @@
 # crud
 Easy CRUDs
 
+## Use with Laravel ony
+
 # Install
 ```
 composer require kairossystems/crud
