@@ -18,6 +18,9 @@ class BaseController extends Controller
 
     public function index()
     {
+        if (method_exists($this, 'validate')) {
+            $this->validate(__CLASS__, __FUNCTION__);
+        }
         $this->validatePermission();
         if (property_exists($this, 'showables')) {
             return response()->json($this->class::get($this->showables));

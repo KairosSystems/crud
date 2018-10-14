@@ -1,7 +1,7 @@
 {
     "name": "kairossystems/crud",
     "description": "Easy CRUDs.",
-    "keywords": ["php", "crud", "laravel","controller"],
+    "keywords": ["php", "crud", "laravel", "controller", "generic"],
     "license": "MIT",
     "homepage": "https://kairos.systems",
     "authors": [
