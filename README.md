@@ -36,3 +36,5 @@ Now you have the index store, update and delete methods automagically
 
 ## NOTES
 You need the fillable properties in your model
+
+## This is a BETA project any ideas are welcome
