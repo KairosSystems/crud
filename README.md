@@ -1,7 +1,7 @@
 # crud
 Easy CRUDs
 
-## Use with Laravel ony
+## Use with Laravel only
 
 # Install
 ```
