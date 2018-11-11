@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 
 class CRUDController extends Controller
 {
+    protected $idField = 'id';
     protected $field = 'message';
     protected $notFound = 'No se encuentra el registro.';
     protected $deleted = 'Eliminado con éxito.';
@@ -85,7 +86,7 @@ class CRUDController extends Controller
         } else {
             $data = $request->all();
         }
-        $valid = $this->validateData($data, 'Update');
+        $valid = $this->validateData($data, 'Update', $id);
         if ($valid->passes()) {
             $row = $this->class::find($id);
             if (is_null($row)) {
@@ -137,12 +138,21 @@ class CRUDController extends Controller
         return response()->json([$this->field => $this->deleted, 'data' => $row]);
     }
 
-    public function validateData($data, $scope)
+    public function validateData($data, $scope, $id = null)
     {
         $rules = [];
         $field = 'rules'.$scope;
         if (property_exists($this, $field)) {
             $rules = $this->$field;
+            if ($id !=  null) 
+            {
+                foreach ($rules as $index => $rule) {
+                    if (preg_match('/unique/', $rule)) 
+                    {
+                        $rules[$index] = $rule.','.$index.','.$id.','.$this->idField;
+                    }
+                }
+            }
         }
         return Validator::make($data, $rules);
     }
