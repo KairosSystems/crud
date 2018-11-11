@@ -19,6 +19,7 @@ class CRUDController extends Controller
     protected $class = '';
     protected $paginate = false;
     protected $perPage = 25;
+    protected $deleteFiles = false;
 
     public function index()
     {
@@ -60,8 +61,8 @@ class CRUDController extends Controller
             $data = $request->all();
         }
         $valid = $this->validateData($data, 'Create');
+        $this->processSingleFiles($request, $data);
         if ($valid->passes()) {
-            $data = $request->all();
             $row = $this->class::create($data);
             return response()->json([$this->field => 'Creado', 'data' => $row ]);
         } else {
@@ -87,6 +88,7 @@ class CRUDController extends Controller
             $data = $request->all();
         }
         $valid = $this->validateData($data, 'Update', $id);
+        $this->processSingleFiles($request, $data);
         if ($valid->passes()) {
             $row = $this->class::find($id);
             if (is_null($row)) {
@@ -131,6 +133,9 @@ class CRUDController extends Controller
         if (method_exists($this, 'preDestroy')) {
             $this->preDestroy($row);
         }
+        if ($this->deleteFiles) {
+            $this->deleteFiles($row);
+        }
         $row->delete();
         if (method_exists($this, 'postDestroy')) {
             $this->postDestroy($row);
@@ -155,6 +160,60 @@ class CRUDController extends Controller
             }
         }
         return Validator::make($data, $rules);
+    }
+
+    protected function deleteFiles($data)
+    {
+        if (property_exists($this, 'singleFiles')) {
+            $default = ['type' => 'path', 'path' => 'files', 'rule' => 'file'];
+            foreach ($this->singleFiles as $field => $config) {
+                if (is_string($config)) {
+                    $config = ['rule' => $config];
+                }
+                $config = array_merge($default, $config);
+                if ($config['type'] === 'path') {
+                    Storage::disk('local')->delete($data->$field);
+                }
+            }
+        }
+    }
+
+    protected function processSingleFiles(&$request, &$data)
+    {
+        if (property_exists($this, 'singleFiles')) {
+            $default = ['type' => 'path', 'path' => 'files', 'rule' => 'file'];
+            $rules = [];
+            $configs = [];
+            foreach ($this->singleFiles as $field => $config) {
+                if ($request->hasFile($field)) {
+                    if (is_string($config)) {
+                        $config = ['rule' => $config];
+                    }
+                    $config = array_merge($default, $config);
+                    $rules[$field] = $config['rule'];
+                    $configs[$field] = $config;
+                }
+            }
+            $validate = Validator::make($data, $rules);
+            if ($validate->passes()) {
+                foreach ($configs as $field => $value) {
+                    $current = $configs[$field];
+                    if ($current['type'] === 'base64') {
+                        $data[$field] = base64_encode(file_get_contents($request->$field->path()));
+                    } else {
+                        $path = $request->$field->store($configs[$field]['path']);
+                        $data[$field] = $path;
+                    }
+                }
+            } else {
+                $errors = $validate->errors()->all();
+                $msg = implode($this->errorSeparator, $errors);
+                if ($this->returnArrayError) {
+                    abort(400, json_encode([$this->field => $msg, 'errors' => $errors]));
+                }
+                abort(400, json_encode([$this->field => $msg]));
+            }
+        }
     }
 
 }
